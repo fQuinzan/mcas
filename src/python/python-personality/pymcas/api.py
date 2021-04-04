@@ -23,6 +23,7 @@ import numpy as np
 import inspect
 import pickle
 import os
+import pandas as pd
 
 from flatbuffers import util
 
@@ -445,4 +446,28 @@ def test_ref_cnt():
     pool = session.create_pool('fooPool', 100)
     session = 0
     pool = 0
-    
+   
+
+def df_add1(target_df):
+    target_df = target_df + 1
+    # this is sent back to client as invoke result
+    return {'newdf': target_df} 
+
+
+def test_df_basic():
+    """
+    Test for pandas dataframe basic
+    create dataframe -> add 1 in teh ADO
+    """
+    session = pymcas.create_session(os.getenv('SERVER_IP'), 11911, debug=3)
+    if sys.getrefcount(session) != 2:
+        raise ValueError("session ref count should be 2")
+    pool = session.create_pool("myPool")
+    if sys.getrefcount(pool) != 2:
+        raise ValueError("pool ref count should be 2")
+
+    df = pd.DataFrame(1, index=np.arange(1, 4), columns=np.arange(6))
+    print("df ", df)
+    pool.save('df', df);
+    result = pool.invoke('df', df_add1)
+    print("new_df ", result)
