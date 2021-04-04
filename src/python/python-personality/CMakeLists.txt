@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.5.1 FATAL_ERROR)
 project(personality-python CXX)
 
 add_subdirectory(pymcas)
+add_subdirectory(omp)
 
 include(${CMAKE_SOURCE_DIR}/mk/avoid_boost_type_to_string_bug.cmake)
 
