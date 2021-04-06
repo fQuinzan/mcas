@@ -1,4 +1,5 @@
 # Python setup.py file
+
 import setuptools
 import os
 from distutils.core import setup, Extension
@@ -9,6 +10,7 @@ import distutils.sysconfig
 cfg_vars = distutils.sysconfig.get_config_vars()
 include_dir = '/usr/include/${PYTHON_FILENAME}'
 
+
 for key, value in cfg_vars.items():
     if(key == 'OPT'):
         cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
@@ -18,13 +20,12 @@ for key, value in cfg_vars.items():
         if(value == 1):
             include_dir = '/usr/include/${PYTHON_FILENAME}'
 
-
 setuptools.setup(
-    name = 'McasPpApiPackage',
+    name = 'OMPPackage',
     version='0.1',
     author='',
     author_email='',
-    description='Basic Feature selection OMP algos and Models',
+    description='OMP Package - Python Personality',
     package_dir={ '': '${CMAKE_CURRENT_BINARY_DIR}' },
     packages=['omp'], #setuptools.find_packages(),
     classifiers=[

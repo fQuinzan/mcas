@@ -1,5 +1,5 @@
 import math
-import models
+import omp.models as models
 import random
 import sys
 import time
@@ -78,7 +78,7 @@ def SDS_OMP(features, target, model, k) :
     int rounds -- the number of parallel calls to the oracle function
     float metric -- a goodness of fit metric for the solution quality
     '''
-
+     
     # define time and rounds
     run_time = time.time()
     rounds = 0
