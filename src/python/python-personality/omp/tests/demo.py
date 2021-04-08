@@ -10,10 +10,10 @@ import time as tm
 from sys import getsizeof
 import cProfile, pstats, io
 
-def ado_run_experiment (features):
+def ado_run_experiment (features, params):
    target = ado.load('target')
-   model = 'logistic'
-   selected_size = 4
+   model = params['model']
+   selected_size = params['selected_size'] 
    from omp import algos as alg 
    out = alg.SDS_OMP(features, target, model, selected_size)
    return out 
@@ -46,12 +46,16 @@ def run_experiment(features, target, model, k_range, SDS_OMP = True, SDS_MA = Tr
         print('----- testing SDS_OMP')
         results = pd.DataFrame(data = {'k': np.zeros(len(k_range)).astype('int'), 'time': np.zeros(len(k_range)), 'rounds': np.zeros(len(k_range)),'metric': np.zeros(len(k_range))})
         for j in range(len(k_range)) :
-             
+            
+            # parameters dor the experiments
+            params = {
+                    'model' : model,
+                    'selected_size' : k_range[j]
+                    }
+
             # perform experiments
 #            out = alg.SDS_OMP(features, target, model, k_range[j])
-            
-#            out = alg.SDS_OMP(features, target, model, 4)  # the experiment run on the client
-            out = pool.invoke('features', ado_run_experiment) # the experiment run on the server
+            out = pool.invoke('features', ado_run_experiment, params) # the experiment run on the server
 
             print (out)
             exit(0)
@@ -128,7 +132,10 @@ if sys.getrefcount(pool) != 2:
     raise ValueError("pool ref count should be 2")
 
 # define features and target for the experiments
-df = pd.read_csv('short_data.csv', index_col=0, parse_dates=False)
+path = os.path.abspath(os.path.dirname(sys.argv[0]))
+dataname = 'short_data.csv'
+fullpath_dataname = os.path.join(path, dataname)
+df = pd.read_csv(fullpath_dataname, index_col=0, parse_dates=False)
 df = pd.DataFrame(df)
 target = df.iloc[:, -1]
 features = df.iloc[:, range(df.shape[1] - 1)]
