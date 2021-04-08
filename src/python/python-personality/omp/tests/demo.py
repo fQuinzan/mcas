@@ -14,8 +14,10 @@ def ado_run_experiment (features, params):
    target = ado.load('target')
    model = params['model']
    selected_size = params['selected_size'] 
-   from omp import algos as alg 
-   out = alg.SDS_OMP(features, target, model, selected_size)
+   alg_type = params['alg_type'] 
+   from omp import algos as alg
+   if (alg_type == "SDS_OMP"):
+      out = alg.SDS_OMP(features, target, model, selected_size)
    return out 
 
      # set range for the experiments
@@ -50,7 +52,8 @@ def run_experiment(features, target, model, k_range, SDS_OMP = True, SDS_MA = Tr
             # parameters dor the experiments
             params = {
                     'model' : model,
-                    'selected_size' : k_range[j]
+                    'selected_size' : k_range[j],
+                    'alg_type' : "SDS_OMP"
                     }
 
             # perform experiments
@@ -127,7 +130,7 @@ Top_k -- if True, test this algorithm
 session = pymcas.create_session(os.getenv('SERVER_IP'), 11911, debug=3)
 if sys.getrefcount(session) != 2:
     raise ValueError("session ref count should be 2")
-pool = session.create_pool("myPool")
+pool = session.create_pool("myPool", 1024*1024*1024)
 if sys.getrefcount(pool) != 2:
     raise ValueError("pool ref count should be 2")
 
@@ -146,7 +149,7 @@ pool.save('target', target)
 model = 'logistic'
 
 # set range for the experiments
-k_range = range(3, 4)
+k_range = range(100, 101)
 
 # choose algorithms to be tested
 SDS_OMP  = True 
