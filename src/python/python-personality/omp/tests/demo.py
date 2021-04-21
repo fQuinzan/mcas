@@ -10,12 +10,14 @@ import time as tm
 from sys import getsizeof
 import cProfile, pstats, io
 
-def ado_run_experiment (features):
+def ado_run_experiment (features, params):
    target = ado.load('target')
-   model = 'logistic'
-   selected_size = 4
-   from omp import algos as alg 
-   out = alg.SDS_OMP(features, target, model, selected_size)
+   model = params['model']
+   selected_size = params['selected_size'] 
+   alg_type = params['alg_type'] 
+   from omp import algos as alg
+   if (alg_type == "SDS_OMP"):
+      out = alg.SDS_OMP(features, target, model, selected_size)
    return out 
 
      # set range for the experiments
@@ -46,12 +48,17 @@ def run_experiment(features, target, model, k_range, SDS_OMP = True, SDS_MA = Tr
         print('----- testing SDS_OMP')
         results = pd.DataFrame(data = {'k': np.zeros(len(k_range)).astype('int'), 'time': np.zeros(len(k_range)), 'rounds': np.zeros(len(k_range)),'metric': np.zeros(len(k_range))})
         for j in range(len(k_range)) :
-             
+            
+            # parameters dor the experiments
+            params = {
+                    'model' : model,
+                    'selected_size' : k_range[j],
+                    'alg_type' : "SDS_OMP"
+                    }
+
             # perform experiments
 #            out = alg.SDS_OMP(features, target, model, k_range[j])
-            
-#            out = alg.SDS_OMP(features, target, model, 4)  # the experiment run on the client
-            out = pool.invoke('features', ado_run_experiment) # the experiment run on the server
+            out = pool.invoke('features', ado_run_experiment, params) # the experiment run on the server
 
             print (out)
             exit(0)
@@ -123,12 +130,15 @@ Top_k -- if True, test this algorithm
 session = pymcas.create_session(os.getenv('SERVER_IP'), 11911, debug=3)
 if sys.getrefcount(session) != 2:
     raise ValueError("session ref count should be 2")
-pool = session.create_pool("myPool")
+pool = session.create_pool("myPool", 1024*1024*1024)
 if sys.getrefcount(pool) != 2:
     raise ValueError("pool ref count should be 2")
 
 # define features and target for the experiments
-df = pd.read_csv('short_data.csv', index_col=0, parse_dates=False)
+path = os.path.abspath(os.path.dirname(sys.argv[0]))
+dataname = 'short_data.csv'
+fullpath_dataname = os.path.join(path, dataname)
+df = pd.read_csv(fullpath_dataname, index_col=0, parse_dates=False)
 df = pd.DataFrame(df)
 target = df.iloc[:, -1]
 features = df.iloc[:, range(df.shape[1] - 1)]
@@ -139,7 +149,7 @@ pool.save('target', target)
 model = 'logistic'
 
 # set range for the experiments
-k_range = range(3, 4)
+k_range = range(100, 101)
 
 # choose algorithms to be tested
 SDS_OMP  = True 
