@@ -77,15 +77,15 @@ def FAST_OMP_parallel_oracle(i, n_cpus, S, A, X_size, t, model) :
         vals = np.array([])
         
         # evaluate feasibility and compute Xj
-        for j in np.setdiff1d(range(len(out[0])), S) :
+        for j in np.setdiff1d(range(len(out[0])), np.append(S, A[0:i])) :
             rounds_ind += 1
-            if models.constraint(features_np, target_np, S, j, model, 'FAST_OMP') and out[0][j] >= pow(t, 0.5):
+            if models.constraint(features_np, target_np, np.append(S, A[0:i]), j, model, 'FAST_OMP') and out[0][j] >= pow(t, 0.5):
                 vals = np.append(vals, j)
         Xj = [vals, out[1], i, False, rounds_ind]
         
         # return points if they fulfill cardinality condition
         if  Xj[0].size < X_size :
-            Xj[-1] = True
+            Xj[-2] = True
             return np.array(Xj, dtype='object')
             
         # otherwise theturn the entire sequence
@@ -109,7 +109,6 @@ def FAST_OMP(features, target, model, k, eps, tau) :
     k -- upper-bound on the solution size
     eps -- parameter epsilon for the approximation
     tau -- parameter m/M for the (M,m)-(restricted smootheness, restricted strong concavity)
-
     OUTPUTS:
     float run_time -- the processing time to optimize the function
     int rounds -- the number of parallel calls to the oracle function
@@ -127,9 +126,12 @@ def FAST_OMP(features, target, model, k, eps, tau) :
     
     # copy features and target to shared array
     grad, metric = models.oracle(features, target, S, model, algo = 'FAST_OMP')
-    features = features.iloc[:,np.array(np.where(grad > 0)[0])]
+    features = features.iloc[:,np.array(np.where(grad >= 0)[0])]
     init_worker(features, target)
     rounds += 1
+    
+    # redefine k
+    k = min(k, features.shape[1] - 1)
     
     # multiprocessing
     N_CPU = mp.cpu_count()
@@ -149,6 +151,8 @@ def FAST_OMP(features, target, model, k, eps, tau) :
         t = np.power(grad, 2)
         t = np.sort(t)[::-1]
         t = (1 - eps) * tau *  np.sum(t[range(k)]) / k
+        
+        print(t)
 
         while X.size > 0 and S.size < k :
 
@@ -219,7 +223,6 @@ def SDS_OMP(features, target, model, k) :
     target -- the observations
     model -- choose if the regression is linear or logistic
     k -- upper-bound on the solution size
-
     OUTPUTS:
     float run_time -- the processing time to optimize the function
     int rounds -- the number of parallel calls to the oracle function
@@ -326,7 +329,6 @@ def SDS_MA(features, target, model, k) :
     target -- the observations
     model -- choose if the regression is linear or logistic
     k -- upper-bound on the solution size
-
     OUTPUTS:
     float run_time -- the processing time to optimize the function
     int rounds -- the number of parallel calls to the oracle function
@@ -432,7 +434,6 @@ def Top_k(features, target, k, model) :
     target -- the observations
     model -- choose if the regression is linear or logistic
     k -- upper-bound on the solution size
-
     OUTPUTS:
     float run_time -- the processing time to optimize the function
     int rounds -- the number of parallel calls to the oracle function

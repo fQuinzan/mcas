@@ -214,18 +214,18 @@ k_range = np.array([25, 50, 100, 150, 200, 250])
 k_range = np.append([1], list(range(1000,20530,1000)))
 
 # choose algorithms to be tested
-SDS_OMP  = True 
+SDS_OMP  = False 
 FAST_OMP = True 
-Top_k    = True 
-SDS_MA   = True 
+Top_k    = False 
+SDS_MA   = False 
 DASH     = False
 
 # define parameters for algorithms
 
-eps_FAST_OMP = 0.6
+eps_FAST_OMP = 1/1000 
 eps_DASH = 0.6
 
-tau = 0.000000
+tau = 0.1
 alpha = tau * tau
 r = mt.ceil(20/eps_DASH * np.log(features.shape[1])/ np.log(1 + eps_DASH/2))
 
