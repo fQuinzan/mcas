@@ -222,8 +222,8 @@ DASH     = False
 
 # define parameters for algorithms
 
-eps_FAST_OMP = 1/1000 
-eps_DASH = 0.6
+eps_FAST_OMP = 0.999 
+eps_DASH = 0.000000001
 
 tau = 0.1
 alpha = tau * tau

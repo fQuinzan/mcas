@@ -126,18 +126,18 @@ def FAST_OMP(features, target, model, k, eps, tau) :
     
     # copy features and target to shared array
     grad, metric = models.oracle(features, target, S, model, algo = 'FAST_OMP')
-    features = features.iloc[:,np.array(np.where(grad >= 0)[0])]
+    #features = features.iloc[:,np.array(np.where(grad >= 0)[0])]
     init_worker(features, target)
     rounds += 1
     
     # redefine k
-    k = min(k, features.shape[1] - 1)
+    feasible_sol = True
     
     # multiprocessing
     N_CPU = mp.cpu_count()
     pool = mp.Pool(N_CPU)
     
-    while iter <= 1/eps and S.size < k :
+    while iter <= 1/eps and feasible_sol :
 
         # define new set X and copy to array
         X = np.setdiff1d(np.array(range(features.shape[1]), int), S)
@@ -150,14 +150,17 @@ def FAST_OMP(features, target, model, k, eps, tau) :
         # define parameter t
         t = np.power(grad, 2)
         t = np.sort(t)[::-1]
-        t = (1 - eps) * tau *  np.sum(t[range(k)]) / k
+        t = (1 - eps) * tau *  np.sum(t[range(min(k, len(t)))]) / min(k, len(t))
         
-        print(t)
+        #k = min(k, features.shape[1] - 1)
 
-        while X.size > 0 and S.size < k :
+        while X.size > 0 and feasible_sol :
 
             # define new random set of features and random index
             A = np.random.choice(np.setdiff1d(X, S), min(k - S.size, np.setdiff1d(X, S).size), replace=False)
+            if A.size == 0 :
+                feasible_sol = False
+                break
 
             # compute the increments in parallel
             X_size = (1 - eps) * X.size
