@@ -4,6 +4,10 @@ project(personality-python CXX)
 
 add_subdirectory(pymcas)
 
+
+
+add_subdirectory(omp)
+
 include(${CMAKE_SOURCE_DIR}/mk/avoid_boost_type_to_string_bug.cmake)
 
 find_program(PYTHON NAMES "python3.7" "python3.6")

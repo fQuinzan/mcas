@@ -25,6 +25,13 @@ import pickle
 import os
 import binascii
 
+
+
+import pandas as pd
+
+
+
+
 from flatbuffers import util
 
 # protocol API
@@ -68,8 +75,6 @@ def methodcheck(types, ranges=None):
 
 @paramcheck(types=[str,int,str,(str,type(None)),int], ranges=[None, None, None, None, None])
 def create_session(ip, port, device="mlx5_0", extra=None, debug=0):
-    return Session(ip, port, device, extra, debug)
-
 
 class Session():
     """
@@ -463,4 +468,40 @@ def test_ref_cnt():
     pool = session.create_pool('fooPool', 100)
     session = 0
     pool = 0
-    
+  
+
+
+
+
+
+
+
+
+
+
+
+def df_add(target_df, param):
+    target_df = target_df + param 
+    # this is sent back to client as invoke result
+    return {'newdf': target_df} 
+
+
+def test_df_basic():
+    """
+    Test for pandas dataframe basic
+    create dataframe -> add 1 in teh ADO
+    """
+    session = pymcas.create_session(os.getenv('SERVER_IP'), 11911, debug=3)
+    if sys.getrefcount(session) != 2:
+        raise ValueError("session ref count should be 2")
+    pool = session.create_pool("myPool")
+    if sys.getrefcount(pool) != 2:
+        raise ValueError("pool ref count should be 2")
+
+    df = pd.DataFrame(1, index=np.arange(1, 4), columns=np.arange(6))
+    print("df ", df)
+    pool.save('df', df);
+    param = 1
+    result = pool.invoke('df', df_add, param)
+    print("new_df ", result)
+>>>>>>> e1c719783e4fba8b59d19fa3d5b48bb189c0f416
