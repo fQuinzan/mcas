@@ -23,8 +23,14 @@ import numpy as np
 import inspect
 import pickle
 import os
-import pandas as pd
 import binascii
+
+
+
+import pandas as pd
+
+
+
 
 from flatbuffers import util
 
@@ -67,10 +73,8 @@ def methodcheck(types, ranges=None):
     return __f
 
 
-@paramcheck(types=[str,int,str,str,int], ranges=[None, None, None, None, None])
-def create_session(ip, port, device="mlx5_0", extra="", debug=0):
-    return Session(ip, port, device, extra, debug)
-
+@paramcheck(types=[str,int,str,(str,type(None)),int], ranges=[None, None, None, None, None])
+def create_session(ip, port, device="mlx5_0", extra=None, debug=0):
 
 class Session():
     """
@@ -78,8 +82,8 @@ class Session():
     """       
     __session = None
 
-    @methodcheck(types=[str, int, str, str, int], ranges=[None, None, None, None, None])
-    def __init__(self, ip, port, device="mlx5_0", extra="", debug=0):
+    @methodcheck(types=[str, int, str, (str, type(None)), int], ranges=[None, None, None, None, None])
+    def __init__(self, ip, port, device="mlx5_0", extra=None, debug=0):
         self.__session = mcas.Session(ip, port, device, extra, debug)
 
     @methodcheck(types=[str, int, int, bool])
@@ -464,7 +468,17 @@ def test_ref_cnt():
     pool = session.create_pool('fooPool', 100)
     session = 0
     pool = 0
-   
+  
+
+
+
+
+
+
+
+
+
+
 
 def df_add(target_df, param):
     target_df = target_df + param 
@@ -490,3 +504,4 @@ def test_df_basic():
     param = 1
     result = pool.invoke('df', df_add, param)
     print("new_df ", result)
+>>>>>>> e1c719783e4fba8b59d19fa3d5b48bb189c0f416

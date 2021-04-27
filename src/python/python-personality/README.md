@@ -23,7 +23,7 @@ Then type interactively:
 
 ```python3
 > import pymcas
-> pymcas.test_image_0()
+> pymcas.test_skimage_0()
 ```
 
 
@@ -64,4 +64,8 @@ def test_skimage_1():
     
     io.imshow(blend)
     io.show()
+<<<<<<< HEAD
 ```
+=======
+```
+>>>>>>> e1c719783e4fba8b59d19fa3d5b48bb189c0f416
