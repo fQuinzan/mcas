@@ -212,7 +212,8 @@ model = 'logistic'
 # set range for the experiments
 k_range = np.array([25, 50, 100, 150, 200, 250])
 k_range = np.append([1], list(range(1000,20530,1000)))
-
+k_range = np.array(list(range(13000,20530,1000)))
+print (k_range)
 # choose algorithms to be tested
 SDS_OMP  = False 
 FAST_OMP = True 
@@ -230,7 +231,7 @@ alpha = tau * tau
 r = mt.ceil(20/eps_DASH * np.log(features.shape[1])/ np.log(1 + eps_DASH/2))
 
 # number of samples per evaluation
-N_samples = 25 
+N_samples = 10 
 
 # run experiment
 run_experiment(features, target, model = model, k_range = k_range, eps_FAST_OMP = eps_FAST_OMP, tau = tau,eps_DASH = eps_DASH, alpha = alpha, r = r, N_samples = N_samples, SDS_OMP = SDS_OMP, SDS_MA = SDS_MA, DASH = DASH, FAST_OMP = FAST_OMP, Top_k = Top_k)
